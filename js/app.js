@@ -64,19 +64,22 @@
   };
 
   function updateDataInState(state, data, cityInputVal, formNum) {
-    var cityData = data._embedded['city:search-results'][0] || null;
+    var cityData = data && data._embedded['city:search-results'][0] || null;
     var cityFullName = cityData && cityData.matching_full_name || null;
-    
-    // if no urban area found for city, update message and exit function
-    try {
-      var urbanAreaData = cityData._embedded['city:item']._embedded['city:urban_area'];
-    } catch(error) {
-      updateMessage(state, 'No data found for ' + makeCapitalCase(cityInputVal));
-      clearInput(formNum);
-      return;
+    if (cityInputVal) {
+      // if no urban area found for city, update message and exit function
+      try {
+        var urbanAreaData = cityData._embedded['city:item']._embedded['city:urban_area'];
+      } catch(error) {
+        updateMessage(state, 'No data found for ' + makeCapitalCase(cityInputVal));
+        clearInput(formNum);
+        return;
+      }
+      addCityDataToState(state, cityFullName, urbanAreaData, formNum);
+    } else {
+      state.cities.splice(formNum, 1);
     }
 
-    addCityDataToState(state, cityFullName, urbanAreaData, formNum);
   };
 
   function getCityData(state, cityInputVal, formNum) {
@@ -89,6 +92,7 @@
         embed: 'city:search-results/city:item/city:urban_area/ua:scores'
       }
     };
+    $('.js-message').html('Waiting for data');
 
     $.ajax(settings)
       // will succeed even if invalid search term
@@ -113,11 +117,14 @@
 
   function updateStateOnAddCity(state, formNum) {
     var cityInputVal = getCityInputVal(state, formNum);
-    console.log(cityInputVal);
+    console.log('cityInputVal:', cityInputVal);
     if (cityInputVal) {
       getCityData(state, cityInputVal, formNum);
     } else {
-      updateMessage(state, 'Please enter a city.');
+      // updateMessage(state, 'Please enter a city.');
+      data = null;
+      updateDataInState(state, data, cityInputVal, formNum);
+      updateViewInState(state);
       renderState(state);
       renderLayout(state);
     }
@@ -139,17 +146,20 @@
   function renderLayout(state) {
     console.log('in renderLayout');
     if (state.currentView === 'noCity') {
+      $('.js-form0').removeClass('col-xs-6');
       $('.js-cityDescription').hide();
       $('.js-qualityOfLifeData').hide();
-      $('.js-form2').hide();
+      $('.js-form1').hide();
     } else if (state.currentView === 'singleCity') {
+      $('.js-form0').addClass('col-xs-6');
       $('.js-cityDescription').show();
       $('.js-qualityOfLifeData').show();
-      $('.js-form2').show();
+      $('.js-form1').show();
     } else if (state.currentView === 'twoCities') {
+      $('.js-form0').addClass('col-xs-6');
       $('.js-cityDescription').hide();
       $('.js-qualityOfLifeData').show();
-      $('.js-form2').show();
+      $('.js-form1').show();
     } else {
       console.log('no view set');
     }
@@ -218,32 +228,42 @@
 
   // all buttons exist on page load
   // don't need to worry about event delegation
-  function listenForAddCityButtonClick() {
-    $('.js-button-addCity').click(function(event) {
+  // function listenForAddCityButtonClick() {
+  //   $('.js-button-addCity').click(function(event) {
+  //     event.preventDefault();
+  //     var formNum = $(event.currentTarget).attr('data-addCity');
+  //     console.log(formNum);
+  //     updateStateOnAddCity(state, formNum);
+  //   });
+  // };
+
+  function listenForFormSubmit() {
+    $('.js-form').submit(function(event) {
       event.preventDefault();
-      var formNum = $(event.currentTarget).attr('data-addCity');
+      var formNum = $(event.currentTarget).attr('data-form');
       console.log(formNum);
       updateStateOnAddCity(state, formNum);
     });
   };
 
-  function listenForRemoveCityButtonClick() {
-    $('.js-button-remove').click(function(event) {
-      event.preventDefault();
-      var formNum = $(event.currentTarget).attr('data-remove');
-      updateStateOnRemoveCity(state, formNum);
-      renderState(state);
-      renderLayout(state);
-    });
-  };
+  // function listenForRemoveCityButtonClick() {
+  //   $('.js-button-remove').click(function(event) {
+  //     event.preventDefault();
+  //     var formNum = $(event.currentTarget).attr('data-remove');
+  //     updateStateOnRemoveCity(state, formNum);
+  //     renderState(state);
+  //     renderLayout(state);
+  //   });
+  // };
 
   ///////////////////////////////////////////////////
   // WINDOW LOAD
   ///////////////////////////////////////////////////
   $(function() {
     renderLayout(state);
-    listenForAddCityButtonClick();
-    listenForRemoveCityButtonClick();
+    // listenForAddCityButtonClick();
+    listenForFormSubmit();
+    // listenForRemoveCityButtonClick();
   });
 
 }());

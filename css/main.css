@@ -5,12 +5,17 @@
 }
 
 .body {
+  margin: 0;
   font-family: arial, sans-serif;
   color: #404248;
+  /*position: relatlive;*/
 }
 
-.hide {
-  display: none;
+.message {
+  /*position: absolute;*/
+  /*top: 0;
+  left: 0;*/
+  height: 20px;
 }
 
 /*******************************************************
@@ -18,9 +23,8 @@ FORMS
 *******************************************************/
 .input {
   display: block;
-  height: 46px;
-  line-height: 46px;
-  font-size: 15px;
+  height: 42px;
+  font-size: 17px;
   text-align: center;
   margin-bottom: 18px;
   outline: none;
@@ -28,6 +32,7 @@ FORMS
   border: none;
   /*border-bottom: 3px solid #b7baca;*/
   color: #404248;
+  background: none;
 }
 
 [data-input="0"] {
@@ -91,4 +96,10 @@ QUALITY OF LIFE DATA DISPLAY
   width: 40px;
   padding-left: 10px;
   font-size: 14px;
+}
+/*****************************************
+UTILITY CLASSES
+/*****************************************/
+.hide {
+  display: none;
 }
